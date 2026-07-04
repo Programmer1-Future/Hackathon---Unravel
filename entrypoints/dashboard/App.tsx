@@ -14,6 +14,7 @@ import { getState } from '@/utils/storage';
 import { useSettings } from '@/utils/useSettings';
 import type { UnravelState } from '@/utils/types';
 import { Card, Stat } from '../sidepanel/ui';
+import { Logo } from '../sidepanel/Logo';
 
 // The "admin page": real accumulated data from chrome.storage.local — nothing
 // mocked, it grows as the extension is used (including during a live demo).
@@ -56,7 +57,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-paper text-ink">
       <div className="mx-auto max-w-4xl px-6 py-10">
-        <h1 className="text-2xl font-extrabold tracking-tight">✨ Unravel — your stats</h1>
+        <h1 className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary pop-primary">
+            <Logo className="h-6 w-6 text-white" />
+          </span>
+          Unravel — your stats
+        </h1>
         <p className="mt-1 text-sm text-ink-faint">
           Every unravel, quest, and streak — building up as you learn.
         </p>
@@ -115,7 +121,7 @@ export default function App() {
         <ChartCard title="Topics unraveld" className="mt-6">
           {topics.length === 0 ? (
             <p className="text-sm text-ink-faint">
-              Nothing yet — highlight some text and hit ✨ Unravel.
+              Nothing yet — highlight some text and hit Unravel.
             </p>
           ) : (
             <ul className="flex flex-wrap gap-2">

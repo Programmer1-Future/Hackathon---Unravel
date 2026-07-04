@@ -61,7 +61,15 @@ export default defineContentScript({
       const shadow = host.attachShadow({ mode: 'closed' });
 
       btn = document.createElement('button');
-      btn.textContent = '✨ Unravel';
+      // The yarn-ball mark + wordmark (inline SVG so it stays crisp on the page).
+      const YARN_SVG =
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+        '<circle cx="10.5" cy="10.5" r="7.6"/>' +
+        '<ellipse cx="10.5" cy="10.5" rx="7.6" ry="3" transform="rotate(32 10.5 10.5)"/>' +
+        '<ellipse cx="10.5" cy="10.5" rx="7.6" ry="3" transform="rotate(-32 10.5 10.5)"/>' +
+        '<ellipse cx="10.5" cy="10.5" rx="3" ry="7.6" transform="rotate(32 10.5 10.5)"/>' +
+        '<path d="M15.8 15.8 q 2.6 2.4 5.4 1.1"/></svg>';
+      btn.innerHTML = `${YARN_SVG}<span>Unravel</span>`;
       // Chunky 2.5D pill — mirrors the extension's tactile language (inline
       // styles, since Tailwind doesn't reach the host page).
       btn.style.cssText = [
@@ -72,6 +80,7 @@ export default defineContentScript({
         'display:flex',
         'align-items:center',
         'justify-content:center',
+        'gap:7px',
         'cursor:pointer',
         'font-family:Nunito,system-ui,sans-serif',
         'font-size:14px',
@@ -90,7 +99,7 @@ export default defineContentScript({
         e.stopPropagation();
         btn!.style.transform = 'translateY(3px)';
         btn!.style.boxShadow = 'none';
-        btn!.textContent = '⏳ Untangling…';
+        btn!.textContent = 'Unravelling…';
         const message: UnravelSelectionMessage = {
           type: 'UNRAVEL_SELECTION',
           text: currentText,

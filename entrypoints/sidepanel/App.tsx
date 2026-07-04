@@ -6,12 +6,13 @@ import {
   ImagePlus,
   ListChecks,
   Send,
-  Sparkles,
   X,
   Zap,
   Highlighter,
 } from 'lucide-react';
+import { Logo } from './Logo';
 import { bumpSession, getCurrentTree, getState } from '@/utils/storage';
+import { hasApiKey } from '@/utils/gemini';
 import { useSettings } from '@/utils/useSettings';
 import type { ChatAttachment, ChatMessage, ConceptTree, PageContext } from '@/utils/types';
 import ConceptPath from './ConceptPath';
@@ -114,7 +115,7 @@ function Panel() {
       <header className="flex shrink-0 items-center justify-between border-b border-line px-4 py-3">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary shadow-[0_2px_8px_rgba(15,108,189,0.4)]">
-            <Sparkles className="h-4.5 w-4.5 text-white" />
+            <Logo className="h-5 w-5 text-white" />
           </div>
           <h1 className="text-lg font-extrabold tracking-tight">Unravel</h1>
         </div>
@@ -197,9 +198,9 @@ function Panel() {
             {status === 'empty' && (
               <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
                 <Empty
-                  icon="✨"
-                  title="Nothing unraveld yet"
-                  text="Highlight text on any page for the ✨ button — or unravel a PDF / diagram straight from the screen:"
+                  icon="logo"
+                  title="Nothing unravelled yet"
+                  text="Highlight text on any page for the Unravel button — or unravel a PDF or diagram straight from the screen:"
                 />
                 <Button variant="primary" size="lg" onClick={captureView}>
                   <Camera className="h-4 w-4" />
@@ -210,7 +211,7 @@ function Panel() {
             {status === 'loading' && (
               <Empty
                 icon="⏳"
-                title="Untangling…"
+                title="Unravelling…"
                 text="Breaking this down into small, calm pieces."
               />
             )}
@@ -237,6 +238,8 @@ function Panel() {
       ) : (
         <Coach pageContext={pageContext} topic={treeData?.topic ?? null} />
       )}
+
+      <GeminiBar live={status === 'loading'} />
     </div>
   );
 }
@@ -304,7 +307,7 @@ function Coach({ pageContext, topic }: { pageContext: PageContext | null; topic:
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">
         {history.length === 0 && !thinking ? (
           <div className="flex h-full flex-col items-center justify-center text-center opacity-70">
-            <Sparkles className="mb-3 h-10 w-10 text-ink-faint" />
+            <Logo className="mb-3 h-11 w-11 text-ink-faint" />
             <p className="text-sm font-extrabold">I can see this whole page.</p>
             <p className="mt-1 max-w-[220px] text-xs font-semibold text-ink-faint">
               No copying, no screenshots — just ask.
@@ -359,7 +362,7 @@ function Coach({ pageContext, topic }: { pageContext: PageContext | null; topic:
           <div className="flex items-center gap-2 px-3 pb-1 pt-2.5">
             <span className="flex items-center gap-1.5 rounded-lg bg-primary/10 py-1 pl-1.5 pr-2">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary">
-                <Sparkles className="h-3 w-3 text-white" />
+                <Logo className="h-3.5 w-3.5 text-white" />
               </span>
               <span className="text-[10px] font-extrabold uppercase tracking-wide text-primary">
                 Context
@@ -443,10 +446,37 @@ function Dot({ delay }: { delay: string }) {
   );
 }
 
+// Honest "powered by" strip — the dot pulses while a real Gemini call is in
+// flight, so it's visibly, provably doing the AI work (not faked). Amber in
+// demo mode (no API key) so we never overclaim.
+function GeminiBar({ live }: { live: boolean }) {
+  const real = hasApiKey();
+  return (
+    <div className="flex shrink-0 items-center justify-center gap-1.5 border-t border-line px-4 py-1.5">
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${
+          live ? 'animate-pulse bg-primary' : real ? 'bg-accent-green' : 'bg-amber-400'
+        }`}
+      />
+      <span className="text-[10px] font-bold tracking-wide text-ink-faint">
+        {live
+          ? 'Gemini 2.5 Flash is reading this…'
+          : real
+            ? 'Powered by Gemini 2.5 Flash'
+            : 'Demo mode — add a Gemini key for live AI'}
+      </span>
+    </div>
+  );
+}
+
 function Empty({ icon, title, text }: { icon: string; title: string; text: string }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center">
-      <div className="text-4xl">{icon}</div>
+      {icon === 'logo' ? (
+        <Logo className="mb-1 h-12 w-12 text-ink-faint" />
+      ) : (
+        <div className="text-4xl">{icon}</div>
+      )}
       <p className="text-base font-extrabold text-ink">{title}</p>
       <p className="max-w-[240px] text-sm font-semibold leading-relaxed text-ink-faint">{text}</p>
     </div>

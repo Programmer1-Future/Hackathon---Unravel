@@ -4,6 +4,7 @@ import { getState } from '@/utils/storage';
 import { useSettings } from '@/utils/useSettings';
 import type { UnravelState } from '@/utils/types';
 import { Button, Stat } from '../sidepanel/ui';
+import { Logo } from '../sidepanel/Logo';
 
 // Quick-glance stats. The full analytics live on the dashboard page.
 export default function App() {
@@ -21,7 +22,10 @@ export default function App() {
   return (
     <div className="w-64 bg-paper p-4 font-sans text-ink">
       <div className="flex items-center justify-between">
-        <h1 className="text-sm font-extrabold">✨ Unravel</h1>
+        <h1 className="flex items-center gap-1.5 text-sm font-extrabold">
+          <Logo className="h-4 w-4 text-primary" />
+          Unravel
+        </h1>
         <div className="flex rounded-full border-2 border-line-soft bg-card p-0.5">
           <button
             onClick={() => setTheme('light')}
@@ -74,7 +78,7 @@ export default function App() {
       </div>
 
       <p className="mt-3 text-xs font-semibold leading-relaxed text-ink-faint">
-        Highlight text on any page and hit ✨ Unravel to break it down.
+        Highlight text on any page and hit Unravel to break it down.
       </p>
     </div>
   );
