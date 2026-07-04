@@ -55,15 +55,18 @@ function Panel() {
 
   // Initial load + live updates from the background worker via storage.
   useEffect(() => {
-    getCurrentTree().then((t) => {
-      if (t) {
-        setTreeData(t);
-        setStatus('ready');
-      }
-    });
-    chrome.storage.local.get('pageContext').then(({ pageContext }) => {
-      if (pageContext) setPageContext(pageContext as PageContext);
-    });
+    // Read the FULL current state on mount (tree + status + error), so a panel
+    // that opens mid-unravel can't get stuck showing "empty" if it missed the
+    // storage change events fired before its listener registered.
+    chrome.storage.local
+      .get(['currentTree', 'treeStatus', 'treeError', 'pageContext'])
+      .then((s) => {
+        if (s.currentTree) setTreeData(s.currentTree as ConceptTree);
+        if (s.pageContext) setPageContext(s.pageContext as PageContext);
+        if (s.treeError) setError(s.treeError as string);
+        if (s.treeStatus) setStatus(s.treeStatus as Status);
+        else if (s.currentTree) setStatus('ready');
+      });
     getState().then((s) => setXp(s.xp));
 
     const listener = (changes: Record<string, chrome.storage.StorageChange>) => {
