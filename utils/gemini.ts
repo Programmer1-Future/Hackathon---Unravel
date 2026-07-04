@@ -31,6 +31,9 @@ async function generateJson<T>(prompt: string, schema: object): Promise<T> {
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
+        // Disable "thinking" — it roughly halves latency for these structured
+        // extraction tasks that don't need multi-step reasoning.
+        thinkingConfig: { thinkingBudget: 0 },
         responseMimeType: 'application/json',
         responseSchema: schema,
       },
@@ -113,6 +116,7 @@ ${DECOMPOSE_RULES}`,
         },
       ],
       generationConfig: {
+        thinkingConfig: { thinkingBudget: 0 },
         responseMimeType: 'application/json',
         responseSchema: NODE_SCHEMA,
       },
@@ -273,6 +277,7 @@ ${page.pageText.slice(0, 15000)}
         ],
       },
       contents,
+      generationConfig: { thinkingConfig: { thinkingBudget: 0 } },
     }),
   });
 

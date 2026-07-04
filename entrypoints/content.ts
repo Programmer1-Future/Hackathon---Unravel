@@ -109,7 +109,21 @@ export default defineContentScript({
           // screenshot/paste the page into an AI app themselves.
           pageText: document.body.innerText.slice(0, 20000),
         };
-        chrome.runtime.sendMessage(message).finally(hide);
+        // If the extension was reloaded, this old content script's context is
+        // dead and sendMessage throws "Extension context invalidated". Catch it
+        // and tell the user to refresh, instead of silently hanging on "Unravelling…".
+        try {
+          const p = chrome.runtime.sendMessage(message);
+          if (p && typeof p.then === 'function') {
+            p.then(hide).catch(() => {
+              if (btn) btn.textContent = '↻ Refresh page';
+            });
+          } else {
+            hide();
+          }
+        } catch {
+          if (btn) btn.textContent = '↻ Refresh page';
+        }
       });
 
       shadow.appendChild(btn);
