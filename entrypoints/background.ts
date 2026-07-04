@@ -27,7 +27,16 @@ export default defineBackground(() => {
 
   chrome.runtime.onMessage.addListener((message: RuntimeMessage, sender, sendResponse) => {
     if (message.type === 'UNRAVEL_SELECTION') {
-      handleUnravel(message, sender.tab?.id).then(sendResponse);
+      // Open the panel SYNCHRONOUSLY, as the very first thing — Chrome only
+      // treats sidePanel.open() as gesture-driven if it runs before any await.
+      // (Burying it inside the async handler is why it silently failed.)
+      const tabId = sender.tab?.id;
+      if (tabId !== undefined) {
+        chrome.sidePanel.open({ tabId }).catch((e) => {
+          console.warn('[unravel] sidePanel.open failed; toolbar icon still works:', e);
+        });
+      }
+      handleUnravel(message, tabId).then(sendResponse);
       return true; // keep the message channel open for the async response
     }
     if (message.type === 'CHAT_ASK') {
@@ -106,16 +115,9 @@ export default defineBackground(() => {
     }
   }
 
-  async function handleUnravel(message: UnravelSelectionMessage, tabId: number | undefined) {
-    // Open the panel first — sidePanel.open must run while the user gesture
-    // from the content-script click is still "fresh".
-    if (tabId !== undefined) {
-      try {
-        await chrome.sidePanel.open({ tabId });
-      } catch (e) {
-        console.warn('[unravel] sidePanel.open failed (use toolbar icon instead):', e);
-      }
-    }
+  async function handleUnravel(message: UnravelSelectionMessage, _tabId: number | undefined) {
+    // Panel is opened synchronously in the message listener above (gesture
+    // preservation). Here we just do the async Gemini work.
 
     // Save the whole page as chat context, signal "loading", then fill in the tree.
     const pageContext: PageContext = {
